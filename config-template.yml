@@ -1,0 +1,53 @@
+servers:
+  - http:
+      port: 8080
+      responses:
+        - path: /test
+          get:
+            static:
+              status: 200
+              body: all good
+          post:
+            seq:
+              - status: 500
+                body: oops that did not work
+              - status: 500
+                body: try again buddy
+              - status: 200
+                body: whew now it worked
+        - path: /slow
+          get:
+            seq:
+              - status: 200
+                body: this is a slow response
+                delay: 500ms
+              - status: 200
+                body: this is even slower
+                delay: 1s
+        - path: /big
+          get:
+            static:
+              status: 200
+              bigbody:
+                size: 10M
+                type: lorem
+  - tcp:
+      port: 8081
+      responses:
+        - read:
+            bufsize: 1M
+            delay: 1s
+        - write:
+            bufsize: 1M
+            delay: 500ms
+            type: binary
+  - websocket:
+      port: 8082
+      responses:
+        - read:
+            bufsize: 1M
+            delay: 1s
+        - write:
+            bufsize: 1M
+            delay: 1s
+            type: binary
