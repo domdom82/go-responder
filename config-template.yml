@@ -2,7 +2,7 @@ servers:
   - http:
       port: 8080
       responses:
-        - path: /test
+        /test:
           get:
             static:
               status: 200
@@ -15,7 +15,7 @@ servers:
                 body: try again buddy
               - status: 200
                 body: whew now it worked
-        - path: /slow
+        /slow:
           get:
             seq:
               - status: 200
@@ -24,7 +24,7 @@ servers:
               - status: 200
                 body: this is even slower
                 delay: 1s
-        - path: /big
+        /big:
           get:
             static:
               status: 200
@@ -34,20 +34,20 @@ servers:
   - tcp:
       port: 8081
       responses:
-        - read:
-            bufsize: 1M
-            delay: 1s
-        - write:
-            bufsize: 1M
-            delay: 500ms
-            type: binary
+        read:
+          bufsize: 1M
+          delay: 1s
+        write:
+          bufsize: 1M
+          type: binary
+          delay: 500ms
   - websocket:
       port: 8082
       responses:
-        - read:
-            bufsize: 1M
-            delay: 1s
-        - write:
-            bufsize: 1M
-            delay: 1s
-            type: binary
+        read:
+          bufsize: 1M
+          delay: 1s
+        write:
+          bufsize: 1M
+          type: binary
+          delay: 1s

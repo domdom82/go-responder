@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func main() {
 
 	config, err := NewServerConfigFromFile("config.yml")
@@ -10,13 +8,15 @@ func main() {
 		panic(err)
 	}
 
-	for _,serverConfig := range config.ServerConfigs {
+	for _, serverConfig := range config.ServerConfigs {
 
-		fmt.Println(serverConfig)
+		if serverConfig.Http != nil {
+			go serverConfig.Http.NewServer().Run()
+		}
 	}
 
-	//c := make(chan bool, 1)
-	//
-	//<-c
+	c := make(chan bool, 1)
+
+	<-c
 
 }

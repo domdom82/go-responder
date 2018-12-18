@@ -24,7 +24,6 @@ type HttpResponseOptions struct {
 }
 
 type Response struct {
-	Path   string               `yaml:"path"`
 	Get    *HttpResponseOptions `yaml:"get,omitempty"`
 	Put    *HttpResponseOptions `yaml:"put,omitempty"`
 	Post   *HttpResponseOptions `yaml:"post,omitempty"`
@@ -32,8 +31,8 @@ type Response struct {
 }
 
 type Config struct {
-	Port      string      `yaml:"port"`
-	Responses []*Response `yaml:"responses"`
+	Port      string               `yaml:"port"`
+	Responses map[string]*Response `yaml:"responses"`
 }
 
 func (cfg *Config) NewServer() *HttpServer {
@@ -49,19 +48,18 @@ func (cfg Config) String() string {
 
 func (resp Response) String() string {
 	s := strings.Builder{}
-	s.WriteString(fmt.Sprintf("path: %s", resp.Path))
 
 	if resp.Get != nil {
 		s.WriteString(fmt.Sprintf(" GET: %v", resp.Get))
 	}
 	if resp.Put != nil {
-		s.WriteString(fmt.Sprintf(" PUT: %v", resp.Get))
+		s.WriteString(fmt.Sprintf(" PUT: %v", resp.Put))
 	}
 	if resp.Post != nil {
-		s.WriteString(fmt.Sprintf(" POST: %v", resp.Get))
+		s.WriteString(fmt.Sprintf(" POST: %v", resp.Post))
 	}
 	if resp.Delete != nil {
-		s.WriteString(fmt.Sprintf(" DELETE: %v", resp.Get))
+		s.WriteString(fmt.Sprintf(" DELETE: %v", resp.Delete))
 	}
 
 	return fmt.Sprintf("{%s}", s.String())
