@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/domdom82/go-responder/http"
@@ -10,9 +11,9 @@ import (
 )
 
 type ServerConfig struct {
-	Http      *http.Config
-	Tcp       *tcp.Config
-	Websocket *websocket.Config
+	Http      *http.Config      `yaml:"http"`
+	Tcp       *tcp.Config       `yaml:"tcp"`
+	Websocket *websocket.Config `yaml:"websocket"`
 }
 
 type Config struct {
@@ -31,4 +32,19 @@ func NewServerConfigFromFile(filename string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func (cfg ServerConfig) String() string {
+	s := ""
+	if cfg.Http != nil {
+		s = fmt.Sprintf("{http: %v}", cfg.Http)
+	}
+	if cfg.Tcp != nil {
+		s = fmt.Sprintf("{tcp: %v}", cfg.Tcp)
+	}
+	if cfg.Websocket != nil {
+		s = fmt.Sprintf("{websocket: %v}", cfg.Websocket)
+	}
+
+	return s
 }

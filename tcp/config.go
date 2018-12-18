@@ -1,7 +1,25 @@
 package tcp
 
-type Config struct {
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
+type TcpResponse struct {
+	Bufsize string         `yaml:"bufsize"`
+	Delay   *time.Duration `yaml:"delay,omitempty"`
+	Type    *string        `yaml:"type,omitempty"`
+}
+
+type Response struct {
+	Read  *TcpResponse `yaml:"read,omitempty"`
+	Write *TcpResponse `yaml:"write,omitempty"`
+}
+
+type Config struct {
+	Port      string    `yaml:"port"`
+	Responses *Response `yaml:"responses"`
 }
 
 func (cfg *Config) NewServer() *TcpServer {
@@ -9,4 +27,36 @@ func (cfg *Config) NewServer() *TcpServer {
 	server := &TcpServer{cfg}
 
 	return server
+}
+
+func (cfg Config) String() string {
+	return fmt.Sprintf("{port: %s, responses: %v}", cfg.Port, cfg.Responses)
+}
+
+func (response Response) String() string {
+	s := strings.Builder{}
+
+	if response.Read != nil {
+		s.WriteString(fmt.Sprintf(" Read: %v", *response.Read))
+	}
+	if response.Write != nil {
+		s.WriteString(fmt.Sprintf(" Write: %v", *response.Write))
+	}
+
+	return fmt.Sprintf("{%s}", s.String())
+}
+
+func (tcpResponse TcpResponse) String() string {
+	s := strings.Builder{}
+
+	s.WriteString(fmt.Sprintf("Bufsize: %s", tcpResponse.Bufsize))
+
+	if tcpResponse.Type != nil {
+		s.WriteString(fmt.Sprintf(" Type: %s", *tcpResponse.Type))
+	}
+	if tcpResponse.Delay != nil {
+		s.WriteString(fmt.Sprintf(" Delay: %s", *tcpResponse.Delay))
+	}
+
+	return fmt.Sprintf("{%s}", s.String())
 }

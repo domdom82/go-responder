@@ -45,10 +45,9 @@ servers:
       responses:
         read:
           bufsize: 1M
-          delay: 1s
         write:
           bufsize: 1M
-          type: binary
+          type: lorem
           delay: 500ms
   - websocket:
       port: 8082
@@ -58,5 +57,5 @@ servers:
           delay: 1s
         write:
           bufsize: 1M
-          type: binary
+          type: lorem
           delay: 1s

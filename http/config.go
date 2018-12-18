@@ -96,3 +96,7 @@ func (httpResponse HttpResponse) String() string {
 
 	return fmt.Sprintf("{%s}", s.String())
 }
+
+func (bigBody BigBody) String() string {
+	return fmt.Sprintf("{type: %s, size: %s}", bigBody.Type, bigBody.Size)
+}
