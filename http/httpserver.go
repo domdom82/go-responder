@@ -49,6 +49,9 @@ func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, seqNum 
 		if *seqNum < len(httpResponseOptions.Seq)-1 {
 			*seqNum++
 		}
+	} else if httpResponseOptions.Loop != nil {
+		handleHttpResponse(httpResponseOptions.Loop[*seqNum], w, r)
+		*seqNum = (*seqNum + 1) % (len(httpResponseOptions.Loop))
 	}
 
 }

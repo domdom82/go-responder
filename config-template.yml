@@ -24,6 +24,15 @@ servers:
               - status: 200
                 body: this is even slower
                 delay: 1s
+        /loop:
+          get:
+            loop:
+              - status: 200
+                body: one
+              - status: 200
+                body: two
+              - status: 200
+                body: three
         /big:
           get:
             static:

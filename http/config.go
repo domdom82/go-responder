@@ -21,6 +21,7 @@ type HttpResponse struct {
 type HttpResponseOptions struct {
 	Static *HttpResponse   `yaml:"static,omitempty"`
 	Seq    []*HttpResponse `yaml:"seq,omitempty"`
+	Loop   []*HttpResponse `yaml:"loop,omitempty"`
 }
 
 type Response struct {
