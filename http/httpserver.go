@@ -38,7 +38,6 @@ func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request)
 			handleHttpResponseOptions(response.Delete, &seqNum, w, r)
 		}
 	}
-
 }
 
 func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {

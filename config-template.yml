@@ -52,10 +52,18 @@ servers:
   - websocket:
       port: 8082
       responses:
-        read:
-          bufsize: 1M
-          delay: 1s
-        write:
-          bufsize: 1M
-          type: lorem
-          delay: 1s
+        /ws:
+          read:
+            bufsize: 1M
+            delay: 1s
+          write:
+            bufsize: 1M
+            type: binary
+            delay: 1s
+        /ws2:
+          read:
+            bufsize: 1M
+          write:
+            bufsize: 100B
+            type: lorem
+            delay: 1s

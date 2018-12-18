@@ -18,7 +18,9 @@ func main() {
 		if serverConfig.Tcp != nil {
 			go serverConfig.Tcp.NewServer().Run()
 		}
-
+		if serverConfig.Websocket != nil {
+			go serverConfig.Websocket.NewServer().Run()
+		}
 	}
 
 	c := make(chan bool, 1)
