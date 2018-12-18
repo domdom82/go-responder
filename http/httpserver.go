@@ -23,20 +23,32 @@ func (srv *HttpServer) Run() {
 }
 
 func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request) {
+	seqNum := 0
 	return func(w http.ResponseWriter, r *http.Request) {
 		if response.Get != nil && r.Method == http.MethodGet {
-			handleHttpResponseOptions(response.Get, w, r)
+			handleHttpResponseOptions(response.Get, &seqNum, w, r)
 		}
-		//TODO: handle other methods
+		if response.Put != nil && r.Method == http.MethodPut {
+			handleHttpResponseOptions(response.Put, &seqNum, w, r)
+		}
+		if response.Post != nil && r.Method == http.MethodPost {
+			handleHttpResponseOptions(response.Post, &seqNum, w, r)
+		}
+		if response.Delete != nil && r.Method == http.MethodDelete {
+			handleHttpResponseOptions(response.Delete, &seqNum, w, r)
+		}
 	}
 
 }
 
-func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, w http.ResponseWriter, r *http.Request) {
+func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {
 	if httpResponseOptions.Static != nil {
 		handleHttpResponse(httpResponseOptions.Static, w, r)
 	} else if httpResponseOptions.Seq != nil {
-		//TODO: handle sequence. maintain state
+		handleHttpResponse(httpResponseOptions.Seq[*seqNum], w, r)
+		if *seqNum < len(httpResponseOptions.Seq)-1 {
+			*seqNum++
+		}
 	}
 
 }
