@@ -67,4 +67,10 @@ func handleHttpResponse(httpResponse *HttpResponse, w http.ResponseWriter, r *ht
 	} else if httpResponse.Body != nil {
 		w.Write([]byte(*httpResponse.Body))
 	}
+	if httpResponse.ShowHeaders {
+		w.Write([]byte("\n\n----- Headers Received -----\n"))
+		for header, value := range r.Header {
+			w.Write([]byte(fmt.Sprintf("%s : %v \n", header, value)))
+		}
+	}
 }

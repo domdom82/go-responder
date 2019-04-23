@@ -12,10 +12,11 @@ type BigBody struct {
 }
 
 type HttpResponse struct {
-	Status  int            `yaml:"status"`
-	Body    *string        `yaml:"body,omitempty"`
-	BigBody *BigBody       `yaml:"bigbody,omitempty"`
-	Delay   *time.Duration `yaml:"delay,omitempty"`
+	Status      int            `yaml:"status"`
+	ShowHeaders bool           `yaml:"showheaders,omitempty"`
+	Body        *string        `yaml:"body,omitempty"`
+	BigBody     *BigBody       `yaml:"bigbody,omitempty"`
+	Delay       *time.Duration `yaml:"delay,omitempty"`
 }
 
 type HttpResponseOptions struct {
@@ -93,6 +94,7 @@ func (httpResponse HttpResponse) String() string {
 	if httpResponse.Delay != nil {
 		s.WriteString(fmt.Sprintf(" Delay: %s", *httpResponse.Delay))
 	}
+	s.WriteString(fmt.Sprintf(" ShowHeaders: %v", httpResponse.ShowHeaders))
 
 	return fmt.Sprintf("{%s}", s.String())
 }
