@@ -10,16 +10,27 @@ import (
 
 type HttpServer struct {
 	config *Config
+	server *http.Server
 }
 
-func (srv *HttpServer) Run() {
+func (srv *HttpServer) Run() error {
 	fmt.Println("Starting http server on port", srv.config.Port)
+	var err error
+	srv.server = &http.Server{Addr: fmt.Sprintf(":%d", srv.config.Port)}
 
 	for path, response := range srv.config.Responses {
 		http.HandleFunc(path, genHandler(response))
 	}
 
-	http.ListenAndServe(fmt.Sprintf(":%s", srv.config.Port), nil)
+	go func() {
+		err = srv.server.ListenAndServe()
+	}()
+
+	return err
+}
+
+func (srv *HttpServer) Stop() error {
+	return srv.server.Close()
 }
 
 func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request) {

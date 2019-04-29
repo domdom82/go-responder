@@ -13,13 +13,13 @@ func main() {
 	for _, serverConfig := range config.ServerConfigs {
 		fmt.Println(serverConfig)
 		if serverConfig.Http != nil {
-			go serverConfig.Http.NewServer().Run()
+			serverConfig.Http.NewServer().Run()
 		}
 		if serverConfig.Tcp != nil {
-			go serverConfig.Tcp.NewServer().Run()
+			serverConfig.Tcp.NewServer().Run()
 		}
 		if serverConfig.Websocket != nil {
-			go serverConfig.Websocket.NewServer().Run()
+			serverConfig.Websocket.NewServer().Run()
 		}
 	}
 

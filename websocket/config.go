@@ -18,19 +18,19 @@ type Response struct {
 }
 
 type Config struct {
-	Port      string               `yaml:"port"`
+	Port      int                  `yaml:"port"`
 	Responses map[string]*Response `yaml:"responses"`
 }
 
 func (cfg *Config) NewServer() *WsServer {
 
-	server := &WsServer{cfg}
+	server := &WsServer{cfg, nil}
 
 	return server
 }
 
 func (cfg Config) String() string {
-	return fmt.Sprintf("{port: %s, responses: %v}", cfg.Port, cfg.Responses)
+	return fmt.Sprintf("{port: %d, responses: %v}", cfg.Port, cfg.Responses)
 }
 
 func (response Response) String() string {

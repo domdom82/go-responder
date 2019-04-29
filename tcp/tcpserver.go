@@ -6,13 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/domdom82/go-responder/common"
-
 	"code.cloudfoundry.org/bytefmt"
+
+	"github.com/domdom82/go-responder/common"
 )
 
 type TcpServer struct {
-	config *Config
+	config   *Config
+	listener net.Listener
 }
 
 func (srv *TcpServer) HandleConn(conn net.Conn) {
@@ -22,17 +23,19 @@ func (srv *TcpServer) HandleConn(conn net.Conn) {
 
 	wg.Add(1)
 	go func() {
-		readBufSize, _ := bytefmt.ToBytes(srv.config.Responses.Read.Bufsize)
-		readBuf := make([]byte, int(readBufSize))
-		for {
-			if srv.config.Responses.Read.Delay != nil {
-				time.Sleep(*srv.config.Responses.Read.Delay)
-			}
-			nbytes, err := conn.Read(readBuf)
-			fmt.Printf("\nread %d bytes from %v", nbytes, conn.RemoteAddr())
-			if err != nil {
-				fmt.Printf(" (%s)\n", err)
-				break
+		if srv.config.Responses != nil {
+			readBufSize, _ := bytefmt.ToBytes(srv.config.Responses.Read.Bufsize)
+			readBuf := make([]byte, int(readBufSize))
+			for {
+				if srv.config.Responses.Read.Delay != nil {
+					time.Sleep(*srv.config.Responses.Read.Delay)
+				}
+				nbytes, err := conn.Read(readBuf)
+				fmt.Printf("\nread %d bytes from %v", nbytes, conn.RemoteAddr())
+				if err != nil {
+					fmt.Printf(" (%s)\n", err)
+					break
+				}
 			}
 		}
 		wg.Done()
@@ -41,20 +44,22 @@ func (srv *TcpServer) HandleConn(conn net.Conn) {
 	wg.Add(1)
 	go func() {
 		for {
-			if srv.config.Responses.Write.Delay != nil {
-				time.Sleep(*srv.config.Responses.Write.Delay)
-			}
-			dataType := common.ResponseTypeBinary
-			if srv.config.Responses.Write.Type != nil {
-				dataType = *srv.config.Responses.Write.Type
-			}
-			data := common.GenResponseData(dataType, srv.config.Responses.Write.Bufsize)
+			if srv.config.Responses != nil {
+				if srv.config.Responses.Write.Delay != nil {
+					time.Sleep(*srv.config.Responses.Write.Delay)
+				}
+				dataType := common.ResponseTypeBinary
+				if srv.config.Responses.Write.Type != nil {
+					dataType = *srv.config.Responses.Write.Type
+				}
+				data := common.GenResponseData(dataType, srv.config.Responses.Write.Bufsize)
 
-			nbytes, err := conn.Write(data)
-			fmt.Printf("\nwrote %d bytes to %v", nbytes, conn.RemoteAddr())
-			if err != nil {
-				fmt.Printf(" (%s)\n", err)
-				break
+				nbytes, err := conn.Write(data)
+				fmt.Printf("\nwrote %d bytes to %v", nbytes, conn.RemoteAddr())
+				if err != nil {
+					fmt.Printf(" (%s)\n", err)
+					break
+				}
 			}
 		}
 		wg.Done()
@@ -63,16 +68,26 @@ func (srv *TcpServer) HandleConn(conn net.Conn) {
 	wg.Wait()
 }
 
-func (srv *TcpServer) Run() {
+func (srv *TcpServer) Run() error {
 	fmt.Println("Starting tcp server on port", srv.config.Port)
-	listener, _ := net.Listen("tcp", fmt.Sprintf(":%s", srv.config.Port))
-	defer listener.Close()
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			panic(err)
-		}
+	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", srv.config.Port))
+	srv.listener = listener
+	var err error
 
-		go srv.HandleConn(conn)
-	}
+	go func() {
+		defer listener.Close()
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+
+			go srv.HandleConn(conn)
+		}
+	}()
+	return err
+}
+
+func (srv *TcpServer) Stop() error {
+	return srv.listener.Close()
 }

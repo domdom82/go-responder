@@ -1,5 +1,6 @@
 package main
 
 type Server interface {
-	Run()
+	Run() error
+	Stop() error
 }
