@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/domdom82/go-responder/common"
@@ -80,8 +81,13 @@ func handleHttpResponse(httpResponse *HttpResponse, w http.ResponseWriter, r *ht
 	}
 	if httpResponse.ShowHeaders {
 		w.Write([]byte("\n\n----- Headers Received -----\n"))
-		for header, value := range r.Header {
-			w.Write([]byte(fmt.Sprintf("%s : %v \n", header, value)))
+		var keys []string
+		for header := range r.Header {
+			keys = append(keys, header)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			w.Write([]byte(fmt.Sprintf("%s : %v \n", key, r.Header[key])))
 		}
 	}
 }
