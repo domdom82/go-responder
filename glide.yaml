@@ -1,6 +1,0 @@
-package: github.com/domdom82/go-responder
-import:
-- package: code.cloudfoundry.org/bytefmt
-- package: github.com/drhodes/golorem
-- package: github.com/gorilla/websocket
-- package: gopkg.in/yaml.v2
