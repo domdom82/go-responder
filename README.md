@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/domdom82/go-responder.svg?branch=master)](https://travis-ci.org/domdom82/go-responder)
+
 # go-responder
 Configure and test server responses
 
