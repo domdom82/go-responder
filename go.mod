@@ -6,5 +6,7 @@ require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180906201452-2aa6f33b730c
 	github.com/drhodes/golorem v0.0.0-20160418191928-ecccc744c2d9
 	github.com/gorilla/websocket v1.4.1-0.20181206070239-95ba29eb981b
-	gopkg.in/yaml.v2 v2.2.1
+	github.com/onsi/ginkgo v1.10.3
+	github.com/onsi/gomega v1.7.1
+	gopkg.in/yaml.v2 v2.2.4
 )
