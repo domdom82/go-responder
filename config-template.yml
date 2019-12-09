@@ -8,6 +8,9 @@ servers:
               status: 200
               body: all good
               showheaders: true
+              headers:
+                X-TestHeader: [value]
+
           post:
             seq:
               - status: 500

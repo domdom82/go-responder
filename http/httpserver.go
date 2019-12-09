@@ -76,6 +76,13 @@ func handleHttpResponse(httpResponse *HttpResponse, w http.ResponseWriter, r *ht
 	if httpResponse.Delay != nil {
 		time.Sleep(*httpResponse.Delay)
 	}
+	if len(httpResponse.Headers) > 0 {
+		for key, values := range httpResponse.Headers {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+	}
 	w.WriteHeader(httpResponse.Status)
 
 	if httpResponse.BigBody != nil {

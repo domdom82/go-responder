@@ -111,4 +111,36 @@ var _ = Describe("HttpServer", func() {
 		})
 	})
 
+	Context("An endpoint with headers configured", func() {
+		body := "OK"
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Response{
+			"/headers": {Get: &httpResponder.HttpResponseOptions{Static: &httpResponder.HttpResponse{
+				Headers: http.Header{"X-TestHeader": []string{"value"}},
+				Status:  200,
+				Body:    &body,
+			}}},
+		}}
+		httpServer := config.NewServer()
+
+		BeforeEach(func() {
+			err := httpServer.Run()
+			Expect(err).To(BeNil())
+			time.Sleep(1 * time.Second)
+		})
+
+		AfterEach(func() {
+			_ = httpServer.Stop()
+		})
+
+		It("should return headers", func() {
+			response, err := http.Get("http://localhost:8081/headers")
+			Expect(err).To(BeNil())
+			Expect(response.StatusCode).To(Equal(200))
+			bytes, err := ioutil.ReadAll(response.Body)
+			Expect(string(bytes)).To(Equal(body))
+			Expect(err).To(BeNil())
+			Expect(response.Header.Get("X-TestHeader")).To(Equal("value"))
+		})
+	})
+
 })

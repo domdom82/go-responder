@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -12,6 +13,7 @@ type BigBody struct {
 }
 
 type HttpResponse struct {
+	Headers     http.Header    `yaml:"headers"`
 	Status      int            `yaml:"status"`
 	ShowHeaders bool           `yaml:"showheaders,omitempty"`
 	Body        *string        `yaml:"body,omitempty"`
