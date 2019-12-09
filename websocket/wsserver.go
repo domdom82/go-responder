@@ -13,11 +13,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+//WsServer represents a websocket server instance
 type WsServer struct {
 	config *Config
 	server *http.Server
 }
 
+//Run starts a websocket server
 func (srv *WsServer) Run() {
 	fmt.Println("Starting web socket server on port", srv.config.Port)
 	srv.server = &http.Server{Addr: fmt.Sprintf(":%d", srv.config.Port)}
@@ -35,11 +37,12 @@ func (srv *WsServer) Run() {
 
 }
 
+//Stop stops a websocket server
 func (srv *WsServer) Stop() {
 	_ = srv.server.Close()
 }
 
-func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request) {
+func genHandler(response *Stream) func(w http.ResponseWriter, r *http.Request) {
 
 	readBufSize, _ := bytefmt.ToBytes(response.Read.Bufsize)
 	writeBufSize, _ := bytefmt.ToBytes(response.Write.Bufsize)
@@ -66,7 +69,7 @@ func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request)
 
 }
 
-func handleConn(response *Response, conn *websocket.Conn) {
+func handleConn(response *Stream, conn *websocket.Conn) {
 	fmt.Printf("\n(%v) New connection from %v\n", conn.LocalAddr(), conn.RemoteAddr())
 	defer func() {
 		_ = conn.Close()

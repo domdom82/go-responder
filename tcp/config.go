@@ -6,25 +6,29 @@ import (
 	"time"
 )
 
-type TcpResponse struct {
+//Response represents a tcp response
+type Response struct {
 	Bufsize string         `yaml:"bufsize"`
 	Delay   *time.Duration `yaml:"delay,omitempty"`
 	Type    *string        `yaml:"type,omitempty"`
 }
 
-type Response struct {
-	Read  *TcpResponse `yaml:"read,omitempty"`
-	Write *TcpResponse `yaml:"write,omitempty"`
+//Stream represents a tcp read/write stream
+type Stream struct {
+	Read  *Response `yaml:"read,omitempty"`
+	Write *Response `yaml:"write,omitempty"`
 }
 
+//Config represents a tcp server configuration
 type Config struct {
-	Port      int       `yaml:"port"`
-	Responses *Response `yaml:"responses"`
+	Port      int     `yaml:"port"`
+	Responses *Stream `yaml:"responses"`
 }
 
-func (cfg *Config) NewServer() *TcpServer {
+//NewServer creates a new tcp server
+func (cfg *Config) NewServer() *Server {
 
-	server := &TcpServer{cfg, nil}
+	server := &Server{cfg, nil}
 
 	return server
 }
@@ -33,7 +37,7 @@ func (cfg Config) String() string {
 	return fmt.Sprintf("{port: %d, responses: %v}", cfg.Port, cfg.Responses)
 }
 
-func (response Response) String() string {
+func (response Stream) String() string {
 	s := strings.Builder{}
 
 	if response.Read != nil {
@@ -46,7 +50,7 @@ func (response Response) String() string {
 	return fmt.Sprintf("{%s}", s.String())
 }
 
-func (tcpResponse TcpResponse) String() string {
+func (tcpResponse Response) String() string {
 	s := strings.Builder{}
 
 	s.WriteString(fmt.Sprintf("Bufsize: %s", tcpResponse.Bufsize))

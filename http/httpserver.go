@@ -9,12 +9,14 @@ import (
 	"github.com/domdom82/go-responder/common"
 )
 
-type HttpServer struct {
+//Server represents a http server instance
+type Server struct {
 	config *Config
 	server *http.Server
 }
 
-func (srv *HttpServer) Run() {
+//Run runs the http server
+func (srv *Server) Run() {
 	fmt.Println("Starting http server on port", srv.config.Port)
 	mux := http.NewServeMux()
 
@@ -37,7 +39,7 @@ func (srv *HttpServer) Run() {
 }
 
 //Stop stops the http server
-func (srv *HttpServer) Stop() {
+func (srv *Server) Stop() {
 	_ = srv.server.Close()
 }
 
@@ -45,36 +47,36 @@ func genHandler(response *Method) func(w http.ResponseWriter, r *http.Request) {
 	seqNum := 0
 	return func(w http.ResponseWriter, r *http.Request) {
 		if response.Get != nil && r.Method == http.MethodGet {
-			handleHttpResponseOptions(response.Get, &seqNum, w, r)
+			handleHTTPResponseOptions(response.Get, &seqNum, w, r)
 		}
 		if response.Put != nil && r.Method == http.MethodPut {
-			handleHttpResponseOptions(response.Put, &seqNum, w, r)
+			handleHTTPResponseOptions(response.Put, &seqNum, w, r)
 		}
 		if response.Post != nil && r.Method == http.MethodPost {
-			handleHttpResponseOptions(response.Post, &seqNum, w, r)
+			handleHTTPResponseOptions(response.Post, &seqNum, w, r)
 		}
 		if response.Delete != nil && r.Method == http.MethodDelete {
-			handleHttpResponseOptions(response.Delete, &seqNum, w, r)
+			handleHTTPResponseOptions(response.Delete, &seqNum, w, r)
 		}
 	}
 }
 
-func handleHttpResponseOptions(httpResponseOptions *ResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {
+func handleHTTPResponseOptions(httpResponseOptions *ResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {
 	if httpResponseOptions.Static != nil {
-		handleHttpResponse(httpResponseOptions.Static, w, r)
+		handleHTTPResponse(httpResponseOptions.Static, w, r)
 	} else if httpResponseOptions.Seq != nil {
-		handleHttpResponse(httpResponseOptions.Seq[*seqNum], w, r)
+		handleHTTPResponse(httpResponseOptions.Seq[*seqNum], w, r)
 		if *seqNum < len(httpResponseOptions.Seq)-1 {
 			*seqNum++
 		}
 	} else if httpResponseOptions.Loop != nil {
-		handleHttpResponse(httpResponseOptions.Loop[*seqNum], w, r)
+		handleHTTPResponse(httpResponseOptions.Loop[*seqNum], w, r)
 		*seqNum = (*seqNum + 1) % (len(httpResponseOptions.Loop))
 	}
 
 }
 
-func handleHttpResponse(httpResponse *Response, w http.ResponseWriter, r *http.Request) {
+func handleHTTPResponse(httpResponse *Response, w http.ResponseWriter, r *http.Request) {
 	if httpResponse.Delay != nil {
 		time.Sleep(*httpResponse.Delay)
 	}

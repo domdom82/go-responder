@@ -14,10 +14,10 @@ func TestTcp(t *testing.T) {
 	RunSpecs(t, "Tcp Suite")
 }
 
-var _ = Describe("TcpServer", func() {
+var _ = Describe("Server", func() {
 
 	var (
-		tcpServer *TcpServer
+		tcpServer *Server
 		config    *Config
 	)
 
@@ -25,20 +25,26 @@ var _ = Describe("TcpServer", func() {
 		tcpServer.Stop()
 	})
 
-	Describe("Basic TcpServer Tests", func() {
+	Describe("Basic Server Tests", func() {
 		Context("An empty tcp server", func() {
 			config = &Config{Port: 8081}
 			tcpServer = config.NewServer()
-			It("should at least open a port", func() {
+
+			BeforeEach(func() {
 				tcpServer.Run()
 				time.Sleep(1 * time.Second)
+			})
+
+			AfterEach(func() {
+				tcpServer.Stop()
+			})
+
+			It("should at least open a port", func() {
 				_, err := net.Dial("tcp", ":8081")
 				Expect(err).To(BeNil())
 			})
 
 			It("should be stoppable via stop function", func() {
-				tcpServer.Run()
-				time.Sleep(1 * time.Second)
 				_, err := net.Dial("tcp", ":8081")
 				Expect(err).To(BeNil())
 				tcpServer.Stop()
@@ -46,7 +52,6 @@ var _ = Describe("TcpServer", func() {
 				Expect(err).To(Not(BeNil()))
 
 			})
-
 		})
 
 	})

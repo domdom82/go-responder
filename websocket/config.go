@@ -6,22 +6,26 @@ import (
 	"time"
 )
 
+//WsResponse represents a websocket response
 type WsResponse struct {
 	Bufsize string         `yaml:"bufsize"`
 	Delay   *time.Duration `yaml:"delay,omitempty"`
 	Type    *string        `yaml:"type,omitempty"`
 }
 
-type Response struct {
+//Stream represents a websocket read/write stream
+type Stream struct {
 	Read  *WsResponse `yaml:"read,omitempty"`
 	Write *WsResponse `yaml:"write,omitempty"`
 }
 
+//Config represents a websocket server configuration
 type Config struct {
-	Port      int                  `yaml:"port"`
-	Responses map[string]*Response `yaml:"responses"`
+	Port      int                `yaml:"port"`
+	Responses map[string]*Stream `yaml:"responses"`
 }
 
+//NewServer creates a new websocket server
 func (cfg *Config) NewServer() *WsServer {
 
 	server := &WsServer{cfg, nil}
@@ -33,7 +37,7 @@ func (cfg Config) String() string {
 	return fmt.Sprintf("{port: %d, responses: %v}", cfg.Port, cfg.Responses)
 }
 
-func (response Response) String() string {
+func (response Stream) String() string {
 	s := strings.Builder{}
 
 	if response.Read != nil {

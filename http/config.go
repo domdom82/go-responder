@@ -23,7 +23,7 @@ type Response struct {
 	Delay       *time.Duration `yaml:"delay,omitempty"`
 }
 
-//ResponseOption enumerates types of possible http responses: static, sequence or loop
+//ResponseOptions enumerates types of possible http responses: static, sequence or loop
 type ResponseOptions struct {
 	Static *Response   `yaml:"static,omitempty"`
 	Seq    []*Response `yaml:"seq,omitempty"`
@@ -45,9 +45,9 @@ type Config struct {
 }
 
 //NewServer creates a new HTTP server from a http.config struct
-func (cfg *Config) NewServer() *HttpServer {
+func (cfg *Config) NewServer() *Server {
 
-	server := &HttpServer{cfg, nil}
+	server := &Server{cfg, nil}
 
 	return server
 }

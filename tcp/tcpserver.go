@@ -11,12 +11,13 @@ import (
 	"github.com/domdom82/go-responder/common"
 )
 
-type TcpServer struct {
+//Server represents a tcp server instance
+type Server struct {
 	config   *Config
 	listener net.Listener
 }
 
-func (srv *TcpServer) HandleConn(conn net.Conn) {
+func (srv *Server) handleConn(conn net.Conn) {
 	fmt.Printf("\n(%v) New connection from %v\n", conn.LocalAddr(), conn.RemoteAddr())
 	defer func() {
 		_ = conn.Close()
@@ -70,7 +71,8 @@ func (srv *TcpServer) HandleConn(conn net.Conn) {
 	wg.Wait()
 }
 
-func (srv *TcpServer) Run() {
+//Run starts a tcp server
+func (srv *Server) Run() {
 	fmt.Println("Starting tcp server on port", srv.config.Port)
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", srv.config.Port))
 	srv.listener = listener
@@ -85,11 +87,13 @@ func (srv *TcpServer) Run() {
 				return
 			}
 
-			go srv.HandleConn(conn)
+			go srv.handleConn(conn)
 		}
 	}()
 }
 
-func (srv *TcpServer) Stop() {
+//Stop stops a tcp server
+func (srv *Server) Stop() {
+	fmt.Println("Closing tcp server on", srv.listener.Addr().String())
 	_ = srv.listener.Close()
 }

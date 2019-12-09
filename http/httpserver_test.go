@@ -14,10 +14,10 @@ import (
 
 func TestHttp(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "HttpServer Suite")
+	RunSpecs(t, "Server Suite")
 }
 
-var _ = Describe("HttpServer", func() {
+var _ = Describe("Server", func() {
 
 	Context("An empty http server", func() {
 		config := &httpResponder.Config{Port: 8080}
