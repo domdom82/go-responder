@@ -35,10 +35,6 @@ var _ = Describe("Server", func() {
 				time.Sleep(1 * time.Second)
 			})
 
-			AfterEach(func() {
-				tcpServer.Stop()
-			})
-
 			It("should at least open a port", func() {
 				_, err := net.Dial("tcp", ":8081")
 				Expect(err).To(BeNil())

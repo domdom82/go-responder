@@ -3,7 +3,6 @@ package tcp
 import (
 	"fmt"
 	"net"
-	"sync"
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
@@ -22,53 +21,36 @@ func (srv *Server) handleConn(conn net.Conn) {
 	defer func() {
 		_ = conn.Close()
 	}()
-	wg := &sync.WaitGroup{}
-
-	wg.Add(1)
-	go func() {
-		if srv.config.Responses != nil {
+	if srv.config.Responses != nil {
+		for {
 			readBufSize, _ := bytefmt.ToBytes(srv.config.Responses.Read.Bufsize)
 			readBuf := make([]byte, int(readBufSize))
-			for {
-				if srv.config.Responses.Read.Delay != nil {
-					time.Sleep(*srv.config.Responses.Read.Delay)
-				}
-				nbytes, err := conn.Read(readBuf)
-				fmt.Printf("\nread %d bytes from %v", nbytes, conn.RemoteAddr())
-				if err != nil {
-					fmt.Printf(" (%s)\n", err)
-					break
-				}
+			if srv.config.Responses.Read.Delay != nil {
+				time.Sleep(*srv.config.Responses.Read.Delay)
+			}
+			nbytes, err := conn.Read(readBuf)
+			fmt.Printf("\nread %d bytes from %v", nbytes, conn.RemoteAddr())
+			if err != nil {
+				fmt.Printf(" (%s)\n", err)
+				break
+			}
+			if srv.config.Responses.Write.Delay != nil {
+				time.Sleep(*srv.config.Responses.Write.Delay)
+			}
+			dataType := common.ResponseTypeBinary
+			if srv.config.Responses.Write.Type != nil {
+				dataType = *srv.config.Responses.Write.Type
+			}
+			data := common.GenResponseData(dataType, srv.config.Responses.Write.Bufsize)
+
+			nbytes, err = conn.Write(data)
+			fmt.Printf("\nwrote %d bytes to %v", nbytes, conn.RemoteAddr())
+			if err != nil {
+				fmt.Printf(" (%s)\n", err)
+				break
 			}
 		}
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		for {
-			if srv.config.Responses != nil {
-				if srv.config.Responses.Write.Delay != nil {
-					time.Sleep(*srv.config.Responses.Write.Delay)
-				}
-				dataType := common.ResponseTypeBinary
-				if srv.config.Responses.Write.Type != nil {
-					dataType = *srv.config.Responses.Write.Type
-				}
-				data := common.GenResponseData(dataType, srv.config.Responses.Write.Bufsize)
-
-				nbytes, err := conn.Write(data)
-				fmt.Printf("\nwrote %d bytes to %v", nbytes, conn.RemoteAddr())
-				if err != nil {
-					fmt.Printf(" (%s)\n", err)
-					break
-				}
-			}
-		}
-		wg.Done()
-	}()
-
-	wg.Wait()
+	}
 }
 
 //Run starts a tcp server
