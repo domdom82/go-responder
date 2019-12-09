@@ -74,14 +74,13 @@ var _ = Describe("HttpServer", func() {
 			Expect(response.StatusCode).To(Equal(200))
 		})
 
-		//TODO: need to fix "multiple registrations for /test" by not using DefaultServeMux
-		//It("should have no body", func() {
-		//	response, err := http.Get("http://localhost:8081/test")
-		//	Expect(err).To(BeNil())
-		//	Expect(response.StatusCode).To(Equal(200))
-		//	bytes, err := ioutil.ReadAll(response.Body)
-		//	Expect(string(bytes)).To(Equal(""))
-		//})
+		It("should have no body", func() {
+			response, err := http.Get("http://localhost:8081/test")
+			Expect(err).To(BeNil())
+			Expect(response.StatusCode).To(Equal(200))
+			bytes, err := ioutil.ReadAll(response.Body)
+			Expect(string(bytes)).To(Equal(""))
+		})
 
 	})
 
@@ -108,6 +107,7 @@ var _ = Describe("HttpServer", func() {
 			Expect(response.StatusCode).To(Equal(200))
 			bytes, err := ioutil.ReadAll(response.Body)
 			Expect(string(bytes)).To(Equal(body))
+			Expect(err).To(BeNil())
 		})
 	})
 

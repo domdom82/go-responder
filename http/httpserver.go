@@ -17,10 +17,15 @@ type HttpServer struct {
 func (srv *HttpServer) Run() error {
 	fmt.Println("Starting http server on port", srv.config.Port)
 	var err error
-	srv.server = &http.Server{Addr: fmt.Sprintf(":%d", srv.config.Port)}
+	mux := http.NewServeMux()
 
 	for path, response := range srv.config.Responses {
-		http.HandleFunc(path, genHandler(response))
+		mux.HandleFunc(path, genHandler(response))
+	}
+
+	srv.server = &http.Server{
+		Addr:    fmt.Sprintf(":%d", srv.config.Port),
+		Handler: mux,
 	}
 
 	go func() {
