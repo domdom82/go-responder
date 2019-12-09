@@ -14,9 +14,8 @@ type HttpServer struct {
 	server *http.Server
 }
 
-func (srv *HttpServer) Run() error {
+func (srv *HttpServer) Run() {
 	fmt.Println("Starting http server on port", srv.config.Port)
-	var err error
 	mux := http.NewServeMux()
 
 	for path, response := range srv.config.Responses {
@@ -29,17 +28,20 @@ func (srv *HttpServer) Run() error {
 	}
 
 	go func() {
-		err = srv.server.ListenAndServe()
+		err := srv.server.ListenAndServe()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}()
 
-	return err
 }
 
-func (srv *HttpServer) Stop() error {
-	return srv.server.Close()
+//Stop stops the http server
+func (srv *HttpServer) Stop() {
+	_ = srv.server.Close()
 }
 
-func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request) {
+func genHandler(response *Method) func(w http.ResponseWriter, r *http.Request) {
 	seqNum := 0
 	return func(w http.ResponseWriter, r *http.Request) {
 		if response.Get != nil && r.Method == http.MethodGet {
@@ -57,7 +59,7 @@ func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {
+func handleHttpResponseOptions(httpResponseOptions *ResponseOptions, seqNum *int, w http.ResponseWriter, r *http.Request) {
 	if httpResponseOptions.Static != nil {
 		handleHttpResponse(httpResponseOptions.Static, w, r)
 	} else if httpResponseOptions.Seq != nil {
@@ -72,7 +74,7 @@ func handleHttpResponseOptions(httpResponseOptions *HttpResponseOptions, seqNum 
 
 }
 
-func handleHttpResponse(httpResponse *HttpResponse, w http.ResponseWriter, r *http.Request) {
+func handleHttpResponse(httpResponse *Response, w http.ResponseWriter, r *http.Request) {
 	if httpResponse.Delay != nil {
 		time.Sleep(*httpResponse.Delay)
 	}

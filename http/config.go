@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+//BigBody is a special kind of response bode with large size. Can be lorem ipsum text or binary random.
 type BigBody struct {
 	Size string `yaml:"size"`
 	Type string `yaml:"type"`
 }
 
-type HttpResponse struct {
+//Response represents a single http response
+type Response struct {
 	Headers     http.Header    `yaml:"headers"`
 	Status      int            `yaml:"status"`
 	ShowHeaders bool           `yaml:"showheaders,omitempty"`
@@ -21,24 +23,28 @@ type HttpResponse struct {
 	Delay       *time.Duration `yaml:"delay,omitempty"`
 }
 
-type HttpResponseOptions struct {
-	Static *HttpResponse   `yaml:"static,omitempty"`
-	Seq    []*HttpResponse `yaml:"seq,omitempty"`
-	Loop   []*HttpResponse `yaml:"loop,omitempty"`
+//ResponseOption enumerates types of possible http responses: static, sequence or loop
+type ResponseOptions struct {
+	Static *Response   `yaml:"static,omitempty"`
+	Seq    []*Response `yaml:"seq,omitempty"`
+	Loop   []*Response `yaml:"loop,omitempty"`
 }
 
-type Response struct {
-	Get    *HttpResponseOptions `yaml:"get,omitempty"`
-	Put    *HttpResponseOptions `yaml:"put,omitempty"`
-	Post   *HttpResponseOptions `yaml:"post,omitempty"`
-	Delete *HttpResponseOptions `yaml:"delete,omitempty"`
+//Method maps a HTTP method to a response option
+type Method struct {
+	Get    *ResponseOptions `yaml:"get,omitempty"`
+	Put    *ResponseOptions `yaml:"put,omitempty"`
+	Post   *ResponseOptions `yaml:"post,omitempty"`
+	Delete *ResponseOptions `yaml:"delete,omitempty"`
 }
 
+//Config represents a http server configuration
 type Config struct {
-	Port      int                  `yaml:"port"`
-	Responses map[string]*Response `yaml:"responses"`
+	Port      int                `yaml:"port"`
+	Responses map[string]*Method `yaml:"responses"`
 }
 
+//NewServer creates a new HTTP server from a http.config struct
 func (cfg *Config) NewServer() *HttpServer {
 
 	server := &HttpServer{cfg, nil}
@@ -50,7 +56,7 @@ func (cfg Config) String() string {
 	return fmt.Sprintf("{port: %d, responses: %v}", cfg.Port, cfg.Responses)
 }
 
-func (resp Response) String() string {
+func (resp Method) String() string {
 	s := strings.Builder{}
 
 	if resp.Get != nil {
@@ -69,7 +75,7 @@ func (resp Response) String() string {
 	return fmt.Sprintf("{%s}", s.String())
 }
 
-func (respOptions HttpResponseOptions) String() string {
+func (respOptions ResponseOptions) String() string {
 	s := strings.Builder{}
 
 	if respOptions.Static != nil {
@@ -82,7 +88,7 @@ func (respOptions HttpResponseOptions) String() string {
 	return fmt.Sprintf("{%s}", s.String())
 }
 
-func (httpResponse HttpResponse) String() string {
+func (httpResponse Response) String() string {
 	s := strings.Builder{}
 
 	s.WriteString(fmt.Sprintf("Status: %d", httpResponse.Status))

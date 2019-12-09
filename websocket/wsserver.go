@@ -18,9 +18,8 @@ type WsServer struct {
 	server *http.Server
 }
 
-func (srv *WsServer) Run() error {
+func (srv *WsServer) Run() {
 	fmt.Println("Starting web socket server on port", srv.config.Port)
-	var err error
 	srv.server = &http.Server{Addr: fmt.Sprintf(":%d", srv.config.Port)}
 
 	for path, response := range srv.config.Responses {
@@ -28,14 +27,16 @@ func (srv *WsServer) Run() error {
 	}
 
 	go func() {
-		err = srv.server.ListenAndServe()
+		err := srv.server.ListenAndServe()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}()
 
-	return err
 }
 
-func (srv *WsServer) Stop() error {
-	return srv.server.Close()
+func (srv *WsServer) Stop() {
+	_ = srv.server.Close()
 }
 
 func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +68,9 @@ func genHandler(response *Response) func(w http.ResponseWriter, r *http.Request)
 
 func handleConn(response *Response, conn *websocket.Conn) {
 	fmt.Printf("\n(%v) New connection from %v\n", conn.LocalAddr(), conn.RemoteAddr())
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)

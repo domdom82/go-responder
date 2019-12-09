@@ -1,20 +1,24 @@
-package websocket_test
+package websocket
 
 import (
 	"net"
+	"testing"
 	"time"
-
-	"github.com/domdom82/go-responder/websocket"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
+func TestWebsocket(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Websocket Suite")
+}
+
 var _ = Describe("Websocket Server", func() {
 
 	var (
-		wsServer *websocket.WsServer
-		config   *websocket.Config
+		wsServer *WsServer
+		config   *Config
 	)
 
 	AfterEach(func() {
@@ -23,7 +27,7 @@ var _ = Describe("Websocket Server", func() {
 
 	Describe("Basic Websocket Tests", func() {
 		Context("An empty websocket server", func() {
-			config = &websocket.Config{Port: 8082}
+			config = &Config{Port: 8082}
 			wsServer = config.NewServer()
 			It("should at least open a port", func() {
 				wsServer.Run()

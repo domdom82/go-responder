@@ -24,13 +24,12 @@ var _ = Describe("HttpServer", func() {
 		httpServer := config.NewServer()
 
 		BeforeEach(func() {
-			err := httpServer.Run()
-			Expect(err).To(BeNil())
+			httpServer.Run()
 			time.Sleep(1 * time.Second)
 		})
 
 		AfterEach(func() {
-			_ = httpServer.Stop()
+			httpServer.Stop()
 		})
 
 		It("should at least open a port", func() {
@@ -41,8 +40,7 @@ var _ = Describe("HttpServer", func() {
 		It("should be stoppable via stop function", func() {
 			_, err := net.Dial("tcp", ":8080")
 			Expect(err).To(BeNil())
-			err = httpServer.Stop()
-			Expect(err).To(BeNil())
+			httpServer.Stop()
 			time.Sleep(1 * time.Second)
 			_, err = net.Dial("tcp", ":8080")
 			Expect(err).To(Not(BeNil()))
@@ -51,20 +49,18 @@ var _ = Describe("HttpServer", func() {
 	})
 
 	Context("A simple endpoint", func() {
-		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Response{
-			"/test": {Get: &httpResponder.HttpResponseOptions{Static: &httpResponder.HttpResponse{Status: 200}}},
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Method{
+			"/test": {Get: &httpResponder.ResponseOptions{Static: &httpResponder.Response{Status: 200}}},
 		}}
 		httpServer := config.NewServer()
 
 		BeforeEach(func() {
-			err := httpServer.Run()
-			Expect(err).To(BeNil())
+			httpServer.Run()
 			time.Sleep(1 * time.Second)
 		})
 
 		AfterEach(func() {
-			err := httpServer.Stop()
-			Expect(err).To(BeNil())
+			httpServer.Stop()
 			time.Sleep(1 * time.Second)
 		})
 
@@ -80,25 +76,25 @@ var _ = Describe("HttpServer", func() {
 			Expect(response.StatusCode).To(Equal(200))
 			bytes, err := ioutil.ReadAll(response.Body)
 			Expect(string(bytes)).To(Equal(""))
+			Expect(err).To(BeNil())
 		})
 
 	})
 
 	Context("An endpoint with a body", func() {
 		body := "OK"
-		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Response{
-			"/test2": {Get: &httpResponder.HttpResponseOptions{Static: &httpResponder.HttpResponse{Status: 200, Body: &body}}},
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Method{
+			"/test2": {Get: &httpResponder.ResponseOptions{Static: &httpResponder.Response{Status: 200, Body: &body}}},
 		}}
 		httpServer := config.NewServer()
 
 		BeforeEach(func() {
-			err := httpServer.Run()
-			Expect(err).To(BeNil())
+			httpServer.Run()
 			time.Sleep(1 * time.Second)
 		})
 
 		AfterEach(func() {
-			_ = httpServer.Stop()
+			httpServer.Stop()
 		})
 
 		It("should have a body", func() {
@@ -113,8 +109,8 @@ var _ = Describe("HttpServer", func() {
 
 	Context("An endpoint with headers configured", func() {
 		body := "OK"
-		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Response{
-			"/headers": {Get: &httpResponder.HttpResponseOptions{Static: &httpResponder.HttpResponse{
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Method{
+			"/headers": {Get: &httpResponder.ResponseOptions{Static: &httpResponder.Response{
 				Headers: http.Header{"X-TestHeader": []string{"value"}},
 				Status:  200,
 				Body:    &body,
@@ -123,13 +119,12 @@ var _ = Describe("HttpServer", func() {
 		httpServer := config.NewServer()
 
 		BeforeEach(func() {
-			err := httpServer.Run()
-			Expect(err).To(BeNil())
+			httpServer.Run()
 			time.Sleep(1 * time.Second)
 		})
 
 		AfterEach(func() {
-			_ = httpServer.Stop()
+			httpServer.Stop()
 		})
 
 		It("should return headers", func() {

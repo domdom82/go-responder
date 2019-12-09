@@ -1,20 +1,24 @@
-package tcp_test
+package tcp
 
 import (
 	"net"
+	"testing"
 	"time"
-
-	"github.com/domdom82/go-responder/tcp"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
+func TestTcp(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Tcp Suite")
+}
+
 var _ = Describe("TcpServer", func() {
 
 	var (
-		tcpServer *tcp.TcpServer
-		config    *tcp.Config
+		tcpServer *TcpServer
+		config    *Config
 	)
 
 	AfterEach(func() {
@@ -23,7 +27,7 @@ var _ = Describe("TcpServer", func() {
 
 	Describe("Basic TcpServer Tests", func() {
 		Context("An empty tcp server", func() {
-			config = &tcp.Config{Port: 8081}
+			config = &Config{Port: 8081}
 			tcpServer = config.NewServer()
 			It("should at least open a port", func() {
 				tcpServer.Run()

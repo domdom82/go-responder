@@ -18,7 +18,9 @@ type TcpServer struct {
 
 func (srv *TcpServer) HandleConn(conn net.Conn) {
 	fmt.Printf("\n(%v) New connection from %v\n", conn.LocalAddr(), conn.RemoteAddr())
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)
@@ -68,14 +70,15 @@ func (srv *TcpServer) HandleConn(conn net.Conn) {
 	wg.Wait()
 }
 
-func (srv *TcpServer) Run() error {
+func (srv *TcpServer) Run() {
 	fmt.Println("Starting tcp server on port", srv.config.Port)
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", srv.config.Port))
 	srv.listener = listener
-	var err error
 
 	go func() {
-		defer listener.Close()
+		defer func() {
+			_ = listener.Close()
+		}()
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
@@ -85,9 +88,8 @@ func (srv *TcpServer) Run() error {
 			go srv.HandleConn(conn)
 		}
 	}()
-	return err
 }
 
-func (srv *TcpServer) Stop() error {
-	return srv.listener.Close()
+func (srv *TcpServer) Stop() {
+	_ = srv.listener.Close()
 }

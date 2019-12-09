@@ -11,9 +11,13 @@ import (
 	"code.cloudfoundry.org/bytefmt"
 )
 
+//ResponseTypeBinary represents random binary data
 const ResponseTypeBinary string = "binary"
+
+//ResponseTypeLorem represents random lorem ipsum string data
 const ResponseTypeLorem string = "lorem"
 
+//GenResponseData is a helper function to generate random response data
 func GenResponseData(responseType string, size string) []byte {
 	payload := new(bytes.Buffer)
 
