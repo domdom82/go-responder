@@ -1,6 +1,7 @@
 package http_test
 
 import (
+	"github.com/domdom82/datarate"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -135,6 +136,77 @@ var _ = Describe("Server", func() {
 			Expect(string(bytes)).To(Equal(body))
 			Expect(err).To(BeNil())
 			Expect(response.Header.Get("X-TestHeader")).To(Equal("value"))
+		})
+	})
+
+	Context("An endpoint with a slow data rate", func() {
+		body := "123"
+		rate, _ := datarate.Parse("1B/s")
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Method{
+			"/slow": {Get: &httpResponder.ResponseOptions{Static: &httpResponder.Response{
+				Rate:   rate,
+				Status: 200,
+				Body:   &body,
+			}}},
+		}}
+		httpServer := config.NewServer()
+
+		BeforeEach(func() {
+			httpServer.Run()
+			time.Sleep(1 * time.Second)
+		})
+
+		AfterEach(func() {
+			httpServer.Stop()
+		})
+
+		It("should take 3 seconds to transmit 3 bytes at a rate of 1B/s", func() {
+			response, err := http.Get("http://localhost:8081/slow")
+			Expect(err).To(BeNil())
+			Expect(response.StatusCode).To(Equal(200))
+			tStart := time.Now()
+			bytes, err := ioutil.ReadAll(response.Body)
+			tEnd := time.Now()
+			tDuration := tEnd.Sub(tStart)
+			Expect(string(bytes)).To(Equal(body))
+			Expect(err).To(BeNil())
+			Expect(tDuration.Round(time.Second)).To(Equal(3 * time.Second))
+
+		})
+	})
+
+	Context("An endpoint with a data rate larger than the message", func() {
+		body := "123"
+		rate, _ := datarate.Parse("10B/s")
+		config := &httpResponder.Config{Port: 8081, Responses: map[string]*httpResponder.Method{
+			"/slow": {Get: &httpResponder.ResponseOptions{Static: &httpResponder.Response{
+				Rate:   rate,
+				Status: 200,
+				Body:   &body,
+			}}},
+		}}
+		httpServer := config.NewServer()
+
+		BeforeEach(func() {
+			httpServer.Run()
+			time.Sleep(1 * time.Second)
+		})
+
+		AfterEach(func() {
+			httpServer.Stop()
+		})
+
+		It("should deliver the message completely and immediately", func() {
+			response, err := http.Get("http://localhost:8081/slow")
+			Expect(err).To(BeNil())
+			Expect(response.StatusCode).To(Equal(200))
+			tStart := time.Now()
+			bytes, err := ioutil.ReadAll(response.Body)
+			tEnd := time.Now()
+			tDuration := tEnd.Sub(tStart)
+			Expect(string(bytes)).To(Equal(body))
+			Expect(err).To(BeNil())
+			Expect(tDuration.Round(time.Second)).To(Equal(0 * time.Second))
 		})
 	})
 

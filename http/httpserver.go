@@ -1,7 +1,11 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/domdom82/datarate"
+	"io"
+	"math"
 	"net/http"
 	"sort"
 	"time"
@@ -88,12 +92,16 @@ func handleHTTPResponse(httpResponse *Response, w http.ResponseWriter, r *http.R
 		}
 	}
 	w.WriteHeader(httpResponse.Status)
-
+	var data []byte
 	if httpResponse.BigBody != nil {
-		data := common.GenResponseData(httpResponse.BigBody.Type, httpResponse.BigBody.Size)
-		w.Write(data)
+		data = common.GenResponseData(httpResponse.BigBody.Type, httpResponse.BigBody.Size)
 	} else if httpResponse.Body != nil {
-		w.Write([]byte(*httpResponse.Body))
+		data = []byte(*httpResponse.Body)
+	}
+	if httpResponse.Rate != nil {
+		writeAtRate(w, data, httpResponse.Rate)
+	} else {
+		w.Write(data)
 	}
 	if httpResponse.ShowHeaders {
 		w.Write([]byte("\n\n----- Headers Received -----\n"))
@@ -104,6 +112,32 @@ func handleHTTPResponse(httpResponse *Response, w http.ResponseWriter, r *http.R
 		sort.Strings(keys)
 		for _, key := range keys {
 			w.Write([]byte(fmt.Sprintf("%s : %v \n", key, r.Header[key])))
+		}
+	}
+}
+
+func writeAtRate(w http.ResponseWriter, data []byte, rate *datarate.Datarate) {
+	bytesPerSecond := rate.BytesPerSecond()
+	bytesPerSecondInt := int(math.Ceil(bytesPerSecond))
+	buf := make([]byte, bytesPerSecondInt)
+	byteReader := bytes.NewReader(data)
+
+	for {
+		tStart := time.Now()
+		n, err := byteReader.Read(buf)
+		if n == 0 && err == io.EOF {
+			break
+		}
+		w.Write(buf[:n])
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+		tEnd := time.Now()
+		tDuration := tEnd.Sub(tStart)
+		tWait := time.Second - tDuration
+
+		if tWait > 0 && n == bytesPerSecondInt {
+			time.Sleep(tWait)
 		}
 	}
 }

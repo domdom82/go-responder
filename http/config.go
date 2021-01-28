@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/domdom82/datarate"
 	"net/http"
 	"strings"
 	"time"
@@ -15,12 +16,13 @@ type BigBody struct {
 
 //Response represents a single http response
 type Response struct {
-	Headers     http.Header    `yaml:"headers"`
-	Status      int            `yaml:"status"`
-	ShowHeaders bool           `yaml:"showheaders,omitempty"`
-	Body        *string        `yaml:"body,omitempty"`
-	BigBody     *BigBody       `yaml:"bigbody,omitempty"`
-	Delay       *time.Duration `yaml:"delay,omitempty"`
+	Headers     http.Header        `yaml:"headers"`
+	Status      int                `yaml:"status"`
+	ShowHeaders bool               `yaml:"showheaders,omitempty"`
+	Body        *string            `yaml:"body,omitempty"`
+	BigBody     *BigBody           `yaml:"bigbody,omitempty"`
+	Delay       *time.Duration     `yaml:"delay,omitempty"`
+	Rate        *datarate.Datarate `yaml:"rate,omitempty"`
 }
 
 //ResponseOptions enumerates types of possible http responses: static, sequence or loop
@@ -101,6 +103,9 @@ func (httpResponse Response) String() string {
 	}
 	if httpResponse.Delay != nil {
 		s.WriteString(fmt.Sprintf(" Delay: %s", *httpResponse.Delay))
+	}
+	if httpResponse.Rate != nil {
+		s.WriteString(fmt.Sprintf(" Rate: %f bits/s", *httpResponse.Rate))
 	}
 	s.WriteString(fmt.Sprintf(" ShowHeaders: %v", httpResponse.ShowHeaders))
 

@@ -19,15 +19,24 @@ servers:
                 body: try again buddy
               - status: 200
                 body: whew now it worked
+        /delayed:
+          get:
+            seq:
+              - status: 200
+                body: this response took 0.5 seconds
+                delay: 500ms
+              - status: 200
+                body: this response took 1 second
+                delay: 1s
         /slow:
           get:
             seq:
               - status: 200
                 body: this is a slow response
-                delay: 500ms
+                rate: 10B/s
               - status: 200
                 body: this is even slower
-                delay: 1s
+                rate: 1B/s
         /loop:
           get:
             loop:
